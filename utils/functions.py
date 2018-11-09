@@ -3,10 +3,10 @@
 # @Date:   2017-06-15 14:23:06
 # @Last Modified by:   Jie Yang,     Contact: jieynlp@gmail.com
 # @Last Modified time: 2018-06-10 17:49:50
-from __future__ import print_function
-from __future__ import absolute_import
 import sys
+
 import numpy as np
+
 
 def normalize_word(word):
     new_word = ""
@@ -18,9 +18,10 @@ def normalize_word(word):
     return new_word
 
 
-def read_instance(input_file, word_alphabet, char_alphabet, feature_alphabets, label_alphabet, number_normalized, max_sent_length, char_padding_size=-1, char_padding_symbol = '</pad>'):
+def read_instance(input_file, word_alphabet, char_alphabet, feature_alphabets, label_alphabet, number_normalized,
+                  max_sent_length, char_padding_size=-1, char_padding_symbol='</pad>'):
     feature_num = len(feature_alphabets)
-    in_lines = open(input_file,'r').readlines()
+    in_lines = open(input_file, 'r').readlines()
     instence_texts = []
     instence_Ids = []
     words = []
@@ -51,7 +52,7 @@ def read_instance(input_file, word_alphabet, char_alphabet, feature_alphabets, l
             feat_list = []
             feat_Id = []
             for idx in range(feature_num):
-                feat_idx = pairs[idx+1].split(']',1)[-1]
+                feat_idx = pairs[idx + 1].split(']', 1)[-1]
                 feat_list.append(feat_idx)
                 feat_Id.append(feature_alphabets[idx].get_index(feat_idx))
             features.append(feat_list)
@@ -64,8 +65,8 @@ def read_instance(input_file, word_alphabet, char_alphabet, feature_alphabets, l
             if char_padding_size > 0:
                 char_number = len(char_list)
                 if char_number < char_padding_size:
-                    char_list = char_list + [char_padding_symbol]*(char_padding_size-char_number)
-                assert(len(char_list) == char_padding_size)
+                    char_list = char_list + [char_padding_symbol] * (char_padding_size - char_number)
+                assert (len(char_list) == char_padding_size)
             else:
                 ### not padding
                 pass
@@ -74,9 +75,9 @@ def read_instance(input_file, word_alphabet, char_alphabet, feature_alphabets, l
             chars.append(char_list)
             char_Ids.append(char_Id)
         else:
-            if (len(words) > 0) and ((max_sent_length < 0) or (len(words) < max_sent_length)) :
+            if (len(words) > 0) and ((max_sent_length < 0) or (len(words) < max_sent_length)):
                 instence_texts.append([words, features, chars, labels])
-                instence_Ids.append([word_Ids, feature_Ids, char_Ids,label_Ids])
+                instence_Ids.append([word_Ids, feature_Ids, char_Ids, label_Ids])
             words = []
             features = []
             chars = []
@@ -101,26 +102,29 @@ def build_pretrain_embedding(embedding_path, word_alphabet, embedd_dim=100, norm
     for word, index in word_alphabet.iteritems():
         if word in embedd_dict:
             if norm:
-                pretrain_emb[index,:] = norm2one(embedd_dict[word])
+                pretrain_emb[index, :] = norm2one(embedd_dict[word])
             else:
-                pretrain_emb[index,:] = embedd_dict[word]
+                pretrain_emb[index, :] = embedd_dict[word]
             perfect_match += 1
         elif word.lower() in embedd_dict:
             if norm:
-                pretrain_emb[index,:] = norm2one(embedd_dict[word.lower()])
+                pretrain_emb[index, :] = norm2one(embedd_dict[word.lower()])
             else:
-                pretrain_emb[index,:] = embedd_dict[word.lower()]
+                pretrain_emb[index, :] = embedd_dict[word.lower()]
             case_match += 1
         else:
-            pretrain_emb[index,:] = np.random.uniform(-scale, scale, [1, embedd_dim])
+            pretrain_emb[index, :] = np.random.uniform(-scale, scale, [1, embedd_dim])
             not_match += 1
     pretrained_size = len(embedd_dict)
-    print("Embedding:\n     pretrain word:%s, prefect match:%s, case_match:%s, oov:%s, oov%%:%s"%(pretrained_size, perfect_match, case_match, not_match, (not_match+0.)/alphabet_size))
+    print("Embedding:\n     pretrain word:%s, prefect match:%s, case_match:%s, oov:%s, oov%%:%s" % (
+    pretrained_size, perfect_match, case_match, not_match, (not_match + 0.) / alphabet_size))
     return pretrain_emb, embedd_dim
+
 
 def norm2one(vec):
     root_sum_square = np.sqrt(np.sum(np.square(vec)))
-    return vec/root_sum_square
+    return vec / root_sum_square
+
 
 def load_pretrain_emb(embedding_path):
     embedd_dim = -1
@@ -143,6 +147,7 @@ def load_pretrain_emb(embedding_path):
                 first_col = tokens[0]
             embedd_dict[first_col] = embedd
     return embedd_dict, embedd_dim
+
 
 if __name__ == '__main__':
     a = np.arange(9.0)
